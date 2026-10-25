@@ -1,0 +1,25 @@
+COPY THESE COMMANDS INTO YOUR MAC TERMINAL
+
+Use these after writing app.py and test_app.py. Run them from your ODIN project
+folder, where requirements.txt is located. Nothing below saves result files.
+
+TERMINAL 1 - START THE APP (leave it running)
+
+source .venv/bin/activate
+python -m uvicorn app:app --host 127.0.0.1 --port 8000
+
+TERMINAL 2 - SHOW RESULTS (open another Terminal in the same ODIN folder)
+
+source .venv/bin/activate
+
+Immediate success: expect sent, 1 attempt.
+curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/success.json | python -m json.tool
+
+Success after retry: expect sent, 2 attempts.
+curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/retry_success.json | python -m json.tool
+
+Both attempts fail: expect failed, 2 attempts.
+curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/always_fail.json | python -m json.tool
+
+Run the tests you wrote and show the summary:
+python -m pytest -v

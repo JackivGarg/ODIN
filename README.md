@@ -51,17 +51,11 @@ Name the FastAPI application object `app` and expose `POST /send`.
 python -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000/docs` in Chrome. In another activated Terminal tab:
-
-```bash
-python -m pytest -v | tee results/pytest-results.txt
-curl -sS -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/success.json | tee results/success-response.json
-curl -sS -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/retry_success.json | tee results/retry-success-response.json
-curl -sS -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/always_fail.json | tee results/always-fail-response.json
-```
-
-Check the pytest summary as well as the saved file. `tee` displays and saves
-output; its exit status alone is not proof that pytest passed.
+Open `http://127.0.0.1:8000/docs` in Chrome. Open
+`examples/testing-commands.txt` for commands you can copy into your Mac Terminal.
+They print the three API responses and your pytest results directly in Terminal.
+They do not automatically save result files. Write `test_app.py` yourself during
+recording. Save or copy actual results manually when preparing your submission.
 
 For submission, package the source, tests, requirements, diagram, sample inputs
 and actual results as Studio requests. Exclude `.venv/` and Python caches.
