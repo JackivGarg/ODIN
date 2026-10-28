@@ -1,5 +1,0 @@
-{
-  "recipient": "demo-user",
-  "message": "Your appointment is confirmed.",
-  "scenario": "retry_success"
-}

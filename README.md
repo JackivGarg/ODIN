@@ -1,66 +1,64 @@
-# Odin message retry: blank recording scaffold
+# Message retry simulation
 
-This folder contains preparation material for the approved task: build a local
-message-sending workflow with one optional retry. The Python files are blank
-placeholders. No workflow implementation, completed tests, finished diagram or
-test results are included.
+One endpoint, three LangGraph steps, at most two sending attempts. This
+implementation and its tests were prepared with Codex assistance; this branch is
+no longer a blank scaffold. Follow Odin's disclosure and recording requirements
+and confirm prepared-code eligibility before presenting it as task work.
 
-The scaffold and sample inputs were prepared with Codex assistance. Follow the
-project's disclosure rules; starter-code eligibility and use of AI-prepared
-reference material must be confirmed with the Odin team. Complete the diagram,
-implementation and tests during recording, as specified in the approved idea.
+## Flow
 
-## Mac setup, before recording
+```mermaid
+flowchart TD
+    A([Start]) --> B[First attempt: random status]
+    B -->|2xx success| D[Final result]
+    B -->|4xx or 5xx error| C[Retry once: new random status]
+    C --> D
+    D --> E([End])
+```
 
-Use Python 3.12 for the version combination selected for this exercise.
+`POST /send` accepts a nonblank `recipient` and `message`. Each sending attempt
+randomly chooses `200`, `201`, `400`, `429`, `500` or `503`. A 2xx ends successfully;
+any simulated error on the first attempt gets one retry. The retry always goes
+to the final result, whether it succeeds or fails. There is no third attempt.
+
+The response contains `status`, `status_code`, `attempts`, `history` and
+`simulation: true`. The actual HTTP response code matches the last simulated
+status code. `history: [503, 200]` means the retry succeeded; `[500, 503]` means
+both attempts failed. Each request starts with fresh history.
+
+No real message is sent, no external service is contacted and no LLM is called.
+Here `sent` means simulated 2xx success, not confirmed delivery. Retrying every
+simulated 4xx/5xx is an exercise rule, not a production delivery policy. Invalid
+request data is rejected with HTTP 422 before the workflow starts.
+
+## Files
+
+- `app.py`: request model, sender, route, final result, graph and endpoint.
+- `test_app.py`: controlled tests for success, retry, failure and input validation.
+- `requirements.txt`: pinned dependencies.
+- `examples/testing-commands.txt`: copyable Mac and Windows Terminal commands.
+
+## Run on Mac
+
+Use Python 3.12. From this repository's root:
 
 ```bash
-python3.12 --version
 python3.12 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
-python -c "import fastapi, pydantic, uvicorn, langgraph, pytest, httpx; print('Dependencies ready')"
-```
-
-If Python 3.12 is unavailable, install it from the official Python source before
-continuing. Do not reuse the Interviewer project's virtual environment.
-
-Open this folder in VS Code, activate its virtual environment in Terminal, and
-open a blank draw.io document in Chrome. Check the current eligibility of each
-app in Studio. Test the recording tools before starting the real task. No API
-keys, AI providers, live messaging service or database are needed.
-
-## Work to perform during recording
-
-1. Draw the workflow and save it under `diagram/`.
-2. Implement the local sender, LangGraph workflow and FastAPI endpoint in `app.py`.
-3. Implement the tests in `test_app.py`.
-4. Run each example and compare actual results against the approved scenarios.
-5. Save the results, inspect the finished files and record the required epilogue.
-
-The `scenario` field in the fictional inputs controls a local simulation. It is
-not an option for a real delivery service. Every request must start with a fresh
-attempt counter and history.
-
-## Commands to use AFTER implementing the application
-
-These commands intentionally do not work against the blank placeholder files.
-Name the FastAPI application object `app` and expose `POST /send`.
-
-```bash
 python -m uvicorn app:app --host 127.0.0.1 --port 8000
 ```
 
-Open `http://127.0.0.1:8000/docs` in Chrome. Open
-`examples/testing-commands.txt` for commands you can copy into your Mac Terminal.
-They print the three API responses and your pytest results directly in Terminal.
-They do not automatically save result files. Write `test_app.py` yourself during
-recording. Save or copy actual results manually when preparing your submission.
+Open `http://127.0.0.1:8000/docs`, or use the commands in
+`examples/testing-commands.txt`. Manual requests are random; repeated requests
+can produce different results. To check every branch reliably, tests replace
+the random selector with known status sequences. They still run the actual
+endpoint and graph and check HTTP status, body, history and attempt count.
 
-For submission, package the source, tests, requirements, diagram, sample inputs
-and actual results as Studio requests. Exclude `.venv/` and Python caches.
-Recordings and their exports are submitted separately according to Studio's UI.
+```bash
+python -m pytest -v
+```
 
-The prepared study solution and narration notes remain on the Windows PC only;
-they are not in this branch. Do not present prepared AI-generated work or
-reasoning as work newly created during the recording.
+Output appears in Terminal. The app and copyable commands do not automatically
+save result files. Save actual results and your diagram as Studio requires;
+exclude `.venv/` and caches from the submission.

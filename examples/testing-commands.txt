@@ -1,25 +1,32 @@
-COPY THESE COMMANDS INTO YOUR MAC TERMINAL
+RUN FROM YOUR ODIN PROJECT FOLDER
 
-Use these after writing app.py and test_app.py. Run them from your ODIN project
-folder, where requirements.txt is located. Nothing below saves result files.
-
-TERMINAL 1 - START THE APP (leave it running)
+MAC - TERMINAL 1 (leave the server running)
 
 source .venv/bin/activate
 python -m uvicorn app:app --host 127.0.0.1 --port 8000
 
-TERMINAL 2 - SHOW RESULTS (open another Terminal in the same ODIN folder)
+MAC - TERMINAL 2 (same folder)
 
 source .venv/bin/activate
-
-Immediate success: expect sent, 1 attempt.
-curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/success.json | python -m json.tool
-
-Success after retry: expect sent, 2 attempts.
-curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/retry_success.json | python -m json.tool
-
-Both attempts fail: expect failed, 2 attempts.
-curl -sS --fail -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' --data-binary @examples/always_fail.json | python -m json.tool
-
-Run the tests you wrote and show the summary:
+curl -sS -i -X POST http://127.0.0.1:8000/send -H 'Content-Type: application/json' -d '{"recipient":"demo-user","message":"Hello"}'
 python -m pytest -v
+
+Repeat the curl command to get another random result. The HTTP status line and
+JSON body are both displayed. Do not add --fail: it hides error response bodies
+on some curl versions. An HTTP 400/429/500/503 can be a valid simulated outcome.
+
+WINDOWS POWERSHELL - STUDY EXAMPLE
+
+Open the local Desktop folder '1 - Example Code' in VS Code. In its Terminal:
+
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn app:app --host 127.0.0.1 --port 8000
+
+In a second PowerShell Terminal in that same folder:
+
+.\.venv\Scripts\python.exe -c "import httpx; r = httpx.post('http://127.0.0.1:8000/send', json={'recipient':'demo-user','message':'Hello'}); print('HTTP status:', r.status_code); print(r.text)"
+.\.venv\Scripts\python.exe -m pytest -v
+
+No command above saves results to files. The tests control random statuses to
+check every path reliably. No real messages or LLM calls are made.
